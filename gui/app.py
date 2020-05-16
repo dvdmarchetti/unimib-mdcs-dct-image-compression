@@ -5,7 +5,7 @@ import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
 from scipy.fftpack import dctn, idctn
 
 
@@ -44,6 +44,13 @@ class App(QMainWindow):
             pixmap = QPixmap(inputImage[0])
 
             if not pixmap.toImage().isGrayscale():
+                #error message box
+                msg = QMessageBox()
+                msg.setWindowTitle("Unsupported file Type")
+                msg.setText("put a greyscale photo you idiot") #actual message
+                msg.setIcon(QMessageBox.Critical) #.Critical; .Warning; .Information; .Question
+
+                msg.exec_() #show
                 return
 
             # Remove text placeholders and display image
