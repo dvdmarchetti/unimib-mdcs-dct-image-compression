@@ -19,7 +19,7 @@ class ResizableAspectRatioLabel(QLabel):
         self.repaint()
 
     def paintEvent(self, event):
-        if not self.pixmap.isNull():
+        if self.pixmap != None and (not self.pixmap.isNull()):
             size = self.size()
             painter = QPainter(self)
             point = QPoint(0,0)

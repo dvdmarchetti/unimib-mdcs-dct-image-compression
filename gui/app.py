@@ -18,9 +18,6 @@ class App(QMainWindow):
         self.show()
 
     def connectSignals(self):
-        # Bind action_Open_file menu item signals
-        self.action_Open_file.triggered.connect(self.ask_image)
-
         # Bind openFile push button signals
         self.openFile.clicked.connect(self.ask_image)
 
@@ -29,7 +26,7 @@ class App(QMainWindow):
 
         # Bind F slider signals
         self.fSlider.valueChanged.connect(self.fx_UpdateLabel(source=self.fSlider, target=self.fValue))
-        self.fSlider.valueChanged.connect(self.fx_UpdateMaxTargetValue(source=self.fSlider, target=self.dSlider))
+        self.fSlider.valueChanged.connect(self.fx_UpdateMaxDValue(source=self.fSlider, target=self.dSlider))
 
         # Bind d slider signals
         self.dSlider.valueChanged.connect(self.fx_UpdateLabel(source=self.dSlider, target=self.dValue))
@@ -44,19 +41,19 @@ class App(QMainWindow):
             pixmap = QPixmap(inputImage[0])
 
             if not pixmap.toImage().isGrayscale():
-                #error message box
-                msg = QMessageBox()
-                msg.setWindowTitle("Unsupported file Type")
-                msg.setText("put a greyscale photo you idiot") #actual message
-                msg.setIcon(QMessageBox.Critical) #.Critical; .Warning; .Information; .Question
+                errorBox = QMessageBox()
+                errorBox.setWindowTitle("Unsupported file Type")
+                errorBox.setText("The input file must be a greyscale bitmap")
+                errorBox.setIcon(QMessageBox.Critical)
 
-                msg.exec_() #show
+                errorBox.exec_()
                 return
 
             # Remove text placeholders and display image
             self.originalImage.setText('')
             self.compressedImage.setText('')
             self.originalImage.setPixmap(pixmap)
+            self.compressedImage.setPixmap(None)
 
             limit = min(pixmap.width(), pixmap.height())
             self.fSlider.setMaximum(limit)
@@ -92,14 +89,12 @@ class App(QMainWindow):
 
                 pixels[r*F : (r+1)*F, c*F : (c+1)*F] = idctn(block, norm='ortho')
 
-        # for r in range(height):
-        #     for c in range(width):
-        #         if converted[r,c] < 0:
-        #             converted[r,c] = 0
-        #         elif converted[r,c] > 255:
-        #             converted[r,c] = 255
-        #         else:
-        #             converted[r,c] = np.uint8(converted[r,c])
+        for r in range(height_blocks_count*F):
+            for c in range(width_blocks_count*F):
+                if pixels[r,c] > 255:
+                    pixels[r,c] = 255
+                elif pixels[r,c] < 0:
+                    pixels[r,c] = 0
 
         target = QImage(bytes(pixels), pixels.shape[1], pixels.shape[0], int(pixels.nbytes/height), QImage.Format_Grayscale8)
         self.compressedImage.setPixmap(QPixmap.fromImage(target))
@@ -110,11 +105,12 @@ class App(QMainWindow):
     def fx_UpdateLabel(self, source=None, target=None):
         return lambda: target.setText(str(source.value()))
 
-    def fx_UpdateMaxTargetValue(self, source=None, target=None):
+    def fx_UpdateMaxDValue(self, source=None, target=None):
         return lambda: (
-            source.value() > 0 and target.setMaximum(2*source.value() - 2),
-            source.value() > 0 and target.setTickInterval((2*source.value() - 2) / 10),
-            target.setEnabled(True if source.value() > 0 else False)
+            source.value() == 1 and target.setValue(0),
+            source.value() > 1 and target.setMaximum(2*source.value() - 2),
+            source.value() > 1 and target.setTickInterval((2*source.value() - 2) / 10),
+            target.setEnabled(True if source.value() > 1 else False)
         )
 
 
