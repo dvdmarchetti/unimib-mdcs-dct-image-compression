@@ -6,7 +6,11 @@
 \usepackage{enumitem}
 \usepackage[obeyspaces]{url}
 \usepackage{graphicx}
-\graphicspath{ }
+\usepackage{float}
+\usepackage{xcolor}   % for \textcolor
+\usepackage{fixltx2e}
+\usepackage{hyperref}
+\graphicspath{./immagini }
 
 \title{%
   MCS 2020 \\
@@ -62,17 +66,77 @@ I moduli utilizzati in particolare sono:
 	\end{itemize}
 
 \section{Richiesta immagine}
+	Solitamente, un’immagine a colori è composta da quattro canali ben distinti, identificati con la sigla \textbf{“RGBA”}, ovvero Red, Green, Blue e Alpha (Trasparency).
+La loro combinazione permette la definizione di un qualunque colore.\newline
+La traccia richiede di lavorare in toni di grigio nella quale si è fatta un’osservazione sulla sua espressione ovvero, in figura … si può notare che per rappresentare una determinata tonalità di grigio, il valore della componente R, G e B coincide.
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=1.2\linewidth]{./immagini/canali.png}}
+    \caption{Schema canali RGBA}
+    \label{fig:canali}
+\end{figure}
+	
+	Un’immagine viene rappresentata in termini di pixel e sappiamo che:
+	\begin{itemize}
+		\item Un pixel equivale a 1Byte (ovvero 8 bit);
+		\item 1 Byte rappresenta un numero tra 0-255.
+	\end{itemize}
+	
+Quindi, data un’immagine si va creare un buffer di grandezza data da altezza x larghezza x num\_canali, contente il numero totale di bit dell'immagine. A questo punto si va a definire la funzione (vedere in figura … ) che raggruppa i bit di buffer in gruppi da 8, per ottenere i singoli Byte come intero senza segno (questo ci permetterà di non arrotondare il parametro \textbf{ff} all’intero più vicino). \newline
+Infine, si con i valori contenuti nel primo canale (Red).
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=1.3\linewidth]{./immagini/pixels.png}}
+    \caption{Funzione pixels}
+    \label{fig:pixels}
+\end{figure}
 
-	Si richiede all’utente di andare a reperire un’immagine cliccando sul bottone “open file” che presenta inizialmente la cartella dove si trova il progetto perché contiene una cartella apposita \path{..\folder\resources} dove può reperire immagini di esempio, ma può anche sceglierne una in locale del suo pc.\newline
+Si spiega l’algoritmo nei seguenti passi:
+\begin{enumerate}
+	\item L’immagine originale viene trasformata in PixMap;
+	\item Si definiscono i valori per ogni pixel indicando il canale su cui lavorare;
+	\item Setta i valori di \textbf{f} e \textbf{d} immessi dall’utente;
+	\begin{enumerate}
+		\item Dato F si definisce l’ampiezza dei macro-blocchi;
+	\end{enumerate}
+	\item Quindi, l’immagine viene divisa in blocchi \textbf{f} di pixels di dimensione \emph{F x F}, partendo dal primo blocco in alto a sinistra;
+	\item Per ogni blocco si effettuano le seguenti attività:
+	\begin{enumerate}
+		\item Si applica la dctn (DCT2 della libreria): \textbf{c = DCT2(f)};
+		\item Vengono eliminate le frequenze ckl con k+l >= d;
+		\item Si applica idct\textsubscript{n} sulla matrice c: \textbf{ff} = IDCT2(f)
+	\end{enumerate}
+	\item Trasforma da bit a immagine;
+	\item Riporta l’immagine compressa sulla sezione dedicata;
+\end{enumerate}
+Viene riportata in figura…. Un modello grafico dei passaggi 4 e 5 evidenziando che la ricomposizione dell’immagine non viene effettuata perché una volta finita la compressione sul blocco sarà sostituito direttamente nel blocco occorrente.
+
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=1.3\linewidth]{./immagini/DCT.png}}
+    \caption{Schema funzionamento DCT}
+    %\label{fig:matlab-memory}
+\end{figure}
+
+Di seguito verranno presentati tre esempi di compressione dell’immagine su immagini distinte.\newline
+	L'applicazione richiede all’utente di andare a reperire un’immagine cliccando sul bottone “open file” che presenta inizialmente la cartella dove si trova il progetto perché contiene una cartella apposita \path{..\folder\resources} dove può reperire immagini di esempio, ma può anche sceglierne una in locale del suo pc.\newline
 	Una volta presa l’immagine va a verificare:
 	\begin{enumerate}
 		\item Se il formatto è .bmp, altrimenti presenta in messagge-box-error indicando che il formato dell’immagine è sbagliato;
 		\item Se l’immagine passata non sia a colori presentando un messagge-box-error indicando che l’immagine deve essere in toni di grigio.
 	\end{enumerate}
-	\includegraphics{immagine}
-	
-	L’immagine viene caricata nella prima sezione del pannello permettendo di scalarla come in figura ….
-	%immagine%
+L’immagine rappresentata contiene una buona qualità di compressione avendo scelto opportunamente i valori \textbf{f} e \textbf{d}. Dalla figura si può notare che sono quasi identiche ma sul contrasto dal colore tutto bianco al colore in tonalità di grigio mostra alcune discrepanze che sono minime visto i valori scelti.
+
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=1.3\linewidth]{./immagini/Cervidae.png}}
+    \caption{Prima immagine /resources}
+    \label{fig: Con f = 124 e d =138}
+\end{figure}
+
+L’immagine esposta rappresenta il fenomeno di \textbf{Gibbs} causato dal passaggio del colore nero su bianco e viceversa. Come ben sappiamo, il fenomeno si propaga ed è per questo che sono presenti “cerchi” molto grandi rispetto alle dimensioni dei blocchi f. 
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=1.3\linewidth]{./immagini/C.png}}
+    \caption{Seconda immagine /resources}
+    \label{fig: Figura con f = 30 e d = 58}
+\end{figure}
+
 
 \section{Compressione immagine}
 	Una volta che viene caricata l’immagine l’utente dovrà definire i valori di F e d in modo tale da studiare la qualità della compressione con diversi esempi che elencheremo alla fine.\newline
@@ -110,6 +174,7 @@ Di conseguenza si è deciso di lavorare con un solo canale (in questo caso il pr
 			\item Si applica idctn sulla matrice c: ff = IDCT2(f)
 		\end{enumerate}
 	\end{enumerate}
-
+\section{Conclusioni}
+L’app di compressione riscontra buoni risultati scegliendo i valori f e d opportuni per l’immagini in toni di grigio mentre per quelle definite solo in due colori ben distinti (black \& white) mostra il fenomeno di Gibbs ma questo succede anche con MatLab.
 
 \end{document}
