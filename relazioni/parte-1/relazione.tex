@@ -232,7 +232,7 @@ Quest'ultima copre un range da $10$ a $150$ ad incrementi di $5$ unità tra una 
 \section{Conclusioni}
 L'implementazione proposta dal documento citato nella \cref{section:scipy-fft} risulta quindi confermata dal confronto riportato in \cref{fig:execution-time} ed è sempre più evidente al crescere della dimensione della matrice da elaborare.
 
-Dall'analisi grafica possiamo notare che la \lstinline{DCT2} implementata manualmente segue un andamento riconducibile ad un $O(N^3)$, invece l'implementazione utilizzata in \lstinline{scipy} delinea un andamento altalenante tra $O(NlogN)$) e $O(N^2)$.
+Dall'analisi grafica possiamo notare che la \lstinline{DCT2} implementata manualmente segue un andamento riconducibile ad un $O(N^3)$, invece l'implementazione utilizzata in \lstinline{scipy} delinea un andamento altalenante tra $O(NlogN)$ e $O(N^2)$.
 
 Naturalmente, ci si aspettava che la nostra implementazione risultasse decisamente più lenta dell'implementazione FFT, ciononostante il risultato ottenuto in termini numerici risulta equiparabile con entrambi i metodi.
 \end{document}
