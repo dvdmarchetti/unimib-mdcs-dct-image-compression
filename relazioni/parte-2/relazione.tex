@@ -277,46 +277,45 @@ def compress_image(self):
 \end{lstlisting}
 
 \newpage
-\section{Esempi di compressione}
+\section{Risultati}
 \label{section:examples}
+Negli esempi proposti, la parte in eccesso derivante dalla divisione in blocchi dell'immagine è copiata nell'immagine finale senza compressione di alcun tipo (\cref{fig:c-scale}), questo per non alterare la dimensione finale dell'immagine.
 \begin{figure}[H]
-    \makebox[\textwidth][c]{\includegraphics[width=1\linewidth]{examples/deer_1.png}}
-    \caption{Parametri: $F=124$ e $d=138$}
-    \label{fig:deer-1}
-\end{figure}
-
-Le \cref{fig:deer-1,fig:deer-2} mostrano la differenza nella variazione del parametro $d$, che regola il taglio di frequenza.
-Pur tagliando quasi la metà delle frequenze in \cref{fig:deer-1}, questa risulta indistinguibile rispetto al file originale.
-
-Inoltre, più viene applicata una compressione massiccia come in \cref{fig:deer-2}, più si noterà il delineamento della divisione in blocchi.
-
-\begin{figure}[H]
-    \makebox[\textwidth][c]{\includegraphics[width=1\linewidth]{examples/deer_2.png}}
-    \caption{Parametri: $F=124$ e $d=10$}
-    \label{fig:deer-2}
-\end{figure}
-
-\begin{figure}[H]
-    \makebox[\textwidth][c]{\includegraphics[width=1\linewidth]{examples/c_scale.png}}
+    \makebox[\textwidth][c]{\includegraphics[width=0.9\linewidth]{examples/c_scale.png}}
     \caption{Parametri: $F=30$ e $d=10$}
     \label{fig:c-scale}
 \end{figure}
 
-\vfill
 \noindent
-Le immagini in \cref{fig:c-scale,fig:c-scale-gibbs} rappresenta, seppur in maniera lieve, il fenomeno di \textbf{Gibbs} causato dal passaggio netto dal colore nero al colore bianco (rispettivamente con valori $0$ e $255$) o viceversa, manifestandosi come un aloni che seguono i contorni della C e del cervo.
-
-\vfill
+Il primo confronto, rappresentato in \cref{fig:deer-1,fig:deer-2}, mostra la variazione del parametro $d$, cioè il numero delle frequenze tagliate durante la compressione.
 \begin{figure}[H]
-    \makebox[\textwidth][c]{\includegraphics[width=1\linewidth]{examples/c_scale_gibbs.png}}
+    \makebox[\textwidth][c]{\includegraphics[width=0.9\linewidth]{examples/deer_1.png}}
+    \caption{Parametri: $F=124$ e $d=138$}
+    \label{fig:deer-1}
+\end{figure}
+
+\noindent
+Pur eliminando quasi la metà delle frequenze in \cref{fig:deer-1}, questa risulta indistinguibile rispetto al file originale.
+
+\noindent
+La \cref{fig:deer-2} dimostra invece come più viene applicata una compressione massiccia (parametro $d$ basso), più sarà presente il delineamento della divisione in blocchi.
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=0.9\linewidth]{examples/deer_2.png}}
+    \caption{Parametri: $F=124$ e $d=10$}
+    \label{fig:deer-2}
+\end{figure}
+
+\subsubsection*{Fenomeno di Gibbs}
+Le immagini in \cref{fig:c-scale-gibbs,fig:deer-gibbs} rappresentano il fenomeno di \textbf{Gibbs} causato dal passaggio netto dal colore nero al colore bianco (rispettivamente con valori $0$ e $255$) o viceversa, manifestandosi come un aloni che seguono i contorni della C e del cervo.
+
+\begin{figure}[H]
+    \makebox[\textwidth][c]{\includegraphics[width=0.9\linewidth]{examples/c_scale_gibbs.png}}
     \caption{Fenomeno di Gibbs / Parametri: $F=100$ e $d=98$}
     \label{fig:c-scale-gibbs}
 \end{figure}
 
-\newpage
 \noindent
-Dall'immagine \cref{fig:deer-gibbs} si può osservare un comportamento piuttosto interessante: il fenomeno di Gibbs si propaga esclusivamente all'interno del blocco nel quale si verifica.
-
+Dall'immagine in \cref{fig:deer-gibbs} si può osservare un comportamento piuttosto interessante: il fenomeno di Gibbs si propaga esclusivamente all'interno del blocco nel quale si verifica.
 Proprio per questo motivo, la compressione JPG classica pur operando in modalità differente, utilizza blocchi di dimensione $F$ molto piccoli (solitamente $8\times 8$).
 
 \begin{figure}[H]
@@ -324,28 +323,4 @@ Proprio per questo motivo, la compressione JPG classica pur operando in modalit�
     \caption{Fenomeno di Gibbs / Parametri: $F=124$ e $d=28$}
     \label{fig:deer-gibbs}
 \end{figure}
-
-% deep_1 = 124 e 138
-% deep_2 = 124 e 10
-% c_scale = 30 e 10
-% c = 30 e 10
-
-\newpage
-\section{Osservazioni}
-\begin{enumerate}
-    \item Le immagini richiedono di lavorare con i 4 tipi di canale: RGBA che in combinazione definiscono il colore.
-\end{enumerate}
-La traccia richiede di lavorare con immagini in toni di grigio, dalle analisi fatte(come in figura in alto a destra) si nota che il valore di \textit{un qualunque grigio} è uguale per tutti i canali.\newline
-Di conseguenza si è deciso di lavorare con un solo canale (in questo caso il primo, ovvero Red).
-\begin{enumerate}
-    \item Quindi l’immagine viene divisa in blocchi f di pixels di dimensione F x F, partendo dal primo blocco in alto a sinistra;
-    \item Per ogni blocco si effettuano le seguenti attività:
-    \begin{enumerate}[label=\Alph*]
-        \item Si applica la dctn (DCT2 della libreria): c = DCT2(f);
-        \item Vengono eliminate le frequenze ckl con k+l >= d;
-        \item Si applica idctn sulla matrice c: ff = IDCT2(f)
-    \end{enumerate}
-\end{enumerate}
-
-
 \end{document}
