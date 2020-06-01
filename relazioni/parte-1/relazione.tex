@@ -50,9 +50,9 @@
 \makeatother
 
 \title{
-	Metodi del Calcoli Scientifico \\
-	\normalsize Progetto 2 / Parte 1 \\
-	\normalsize Compressione di immagini tramite la DCT
+    Metodi del Calcoli Scientifico \\
+    \normalsize Implementazione della funzione DCT2 e confronto con \lstinline{scipy} \\
+	\normalsize Progetto 2 / Parte 1
 }
 
 \date{A.A.: 2019/2020}
@@ -65,7 +65,6 @@
 	\normalsize
 	\textsc{Davide Marchetti 815990}
 }
-\makeindex
 
 \begin{document}
 \maketitle
@@ -74,13 +73,13 @@
 Si vuole avere un confronto dei tempi d’esecuzione della DCT2 della libreria scelta con la nostra implementazione elaborando matrici quadrate generate casualmente.
 I risultati ottenuti saranno riportati graficamente in un grafico a scala semi-logaritmica.
 
-% \newpage
+\newpage
 \section{Librerie}
 \subsubsection*{Numpy}
 Libreria open source che contiene diverse funzioni e metodi utili per il calcolo scientifico. In particolar modo per il calcolo vettoriale e di matrici multidimensionali in maniera efficiente e veloce.
 
 \subsubsection*{Scipy}
-Libreria open source che utilizza le funzionalità di Numpy per fornire un pacchetto di calcolo scientifico General-purpose. In particolare, in questo progetto si utilizza la estensione \textbf{Fast Fourier Transform} (\lstinline{fftpack}) per lavorare con le \lstinline{DCT} e \lstinline{DCT-multidimensionale}(\textbf{DCT2}).
+Libreria open source che utilizza le funzionalità di Numpy per fornire un pacchetto di calcolo scientifico General-purpose. In particolare, in questo progetto si utilizza l'estensione \textbf{Fast Fourier Transform} (\lstinline{fftpack}) per lavorare con la \lstinline{DCT monodimensionale} e \lstinline{multidimensionale}(\textbf{DCT2}).
 
 \subsubsection*{Pandas}
 Fornisce una serie di strumenti per elaborare e manipolare dati in formato tabellare (\lstinline{DataFrame}) interfacciandosi con le strutture dati native in Python.
@@ -94,7 +93,7 @@ Utilizzato principalmente per la creazione di grafici statistici. Agisce come un
 
 \subsection{Implementazione della DCT in Scipy}
 \label{section:scipy-fft}
-Dalla documentazione del modulo \lstinline{scipy.fftpack}\footnote{\url{http://wwwens.aero.jussieu.fr/lefrere/master/SPE/docs-python/scipy-doc/generated/scipy.fftpack.dct.html}} viene referenziato un documento che descrive dal punto di vista matematico l'implementazione della DCT mono e multidimensionale nella libreria.
+Dalla documentazione del modulo \lstinline{scipy.fftpack}\footnote{\url{http://wwwens.aero.jussieu.fr/lefrere/master/SPE/docs-python/scipy-doc/generated/scipy.fftpack.dct.html}} viene referenziato un documento che descrive dal punto di vista matematico l'implementazione della DCTN nella libreria.
 
 \noindent
 L'abstract del paper \textit{"A fast cosine transform in one and two dimensions"} di \textit{Makhoul, J. (Feb. 1980)}\footnote{\url{https://ieeexplore.ieee.org/document/1163351}} riporta:
@@ -102,8 +101,11 @@ L'abstract del paper \textit{"A fast cosine transform in one and two dimensions"
     The discrete cosine transform (DCT) of an $N$-point real signal is derived by taking the discrete Fourier transform (DFT) of a $2N$-point even extension of the signal.
     It is shown that the same result may be obtained using only an $N$-point DFT of a reordered version of the original signal, with a resulting saving of 1/2.
     If the fast Fourier transform (FFT) is used to compute the DFT, the result is a fast cosine transform (FCT) that can be computed using on the order of $N log_2(N)$ real multiplications.
-    The method is then extended to two dimmensions, with a saving of 1/4 over the traditional method that uses the DFT.
+    The method is then extended to two dimensions, with a saving of 1/4 over the traditional method that uses the DFT.
 \end{quote}
+
+\noindent
+Si presume quindi, di notare notevoli miglioramenti rispetto all'applicazione della DCT da noi implementata.
 
 \newpage
 \section{Implementazione della DCT/DCTN}
@@ -160,7 +162,7 @@ def dct2(Mat):
 
 \newpage
 \section{Esecuzione}
-Il fulcro del programma consiste in una funzione che accetta in input tre parametri:
+Il fulcro del programma consiste in una funzione (listato \ref{code:main-function}) che accetta in input tre parametri:
 \begin{description}
     \lstitem{offset:} da che dimensione generare le matrici
     \lstitem{how_many:} numero di matrici da generare e confrontare
@@ -179,7 +181,8 @@ La funzione esegue quindi i seguenti step:
 \noindent
 Una volta terminato il ciclo, il vettore \lstinline{matrices} conterrà $2\times$\lstinline{how_many} elementi: i risultati da visualizzare su grafico per il confronto.
 
-\begin{lstlisting}[language=python,emph={math,np},caption=Funzione per il confronto tra implementazioni]
+\newpage
+\begin{lstlisting}[language=python,emph={math,np},label=code:main-function,caption=Funzione per il confronto tra implementazioni]
 def performance_test(offset, how_many, step=1):
     matrices = []
 
@@ -210,15 +213,20 @@ def performance_test(offset, how_many, step=1):
     return matrices
 \end{lstlisting}
 
+\newpage
 \section{Risultati}
 \label{section:results}
+La \cref{fig:execution-time} riporta il tempo di esecuzione posto sulle ordinate e la dimensione della matrice generata sulle ascisse.
+
+Quest'ultima copre un range da $10$ a $150$ ad incrementi di $5$ unità tra una matrice e la successiva.
 
 \begin{figure}[H]
     \makebox[\textwidth][c]{\includegraphics[width=1.3\linewidth]{results.png}}
-    \caption{Confronto tra DCT2 \lstinline{scipy} e \lstinline{custom}}
+    \caption{Confronto tra la DCT2 in \lstinline{scipy} e la nostra implementazione}
     \label{fig:execution-time}
 \end{figure}
 
+\newpage
 \section{Conclusioni}
 L'implementazione proposta dal documento citato nella \cref{section:scipy-fft} risulta quindi confermata dal confronto riportato in \cref{fig:execution-time} ed è sempre più evidente al crescere della dimensione della matrice da elaborare.
 
