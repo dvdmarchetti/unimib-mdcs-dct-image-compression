@@ -91,14 +91,14 @@ Questo permette di ridurre notevolmente la complessità della creazione di un'ap
 
 \newpage
 \section{Interfaccia dell'applicazione}
-In \cref{fig:application-window} riporta l’interfaccia dell'applicazione proposta all'utente e dotata delle seguenti caratteristiche:
+La \cref{fig:application-window} riporta l’interfaccia dell'applicazione proposta all'utente presentando:
 \begin{itemize}
-    \item Un pannello diviso in due sezioni per permettere di visualizzare affiancate: l’immagine originale e la rispettiva versione compressa.
-    \item Un'area per scegliere un immagine da utilizzare come input con una checkbox per visualizzare l'immagine adattandola all'area predisposta.
-    \item Una sezione nella quale regolare i parametri di compressione:
+    \item un pannello diviso in due sezioni per permettere di visualizzare affiancate: l’immagine originale e la rispettiva versione compressa.
+    \item un'area per scegliere un immagine da utilizzare come input con una checkbox per visualizzare l'immagine adattandola all'area predisposta.
+    \item una sezione nella quale regolare i parametri di compressione:
     \begin{enumerate}
-        \item \textbf{$F$:} definisce la dimensione del blocco. L'immagine sarà suddivisa in blocchi $F\times F$ durante il processo di compressione.
-        \item \textbf{$d$:} soglia di taglio delle frequenze di ogni blocco.
+        \item $F$: definisce la dimensione del blocco. L'immagine sarà suddivisa in blocchi $F\times F$ durante il processo di compressione.
+        \item $d$: soglia di taglio delle frequenze di ogni blocco.
     \end{enumerate}
 \end{itemize}
 
@@ -149,7 +149,7 @@ def updateMaxDValue(self):
 \newpage
 \section{Funzionalità}
 \subsection{Richiesta immagine}
-Si richiede all’utente di selezione un'immagine \lstinline{.bmp} in scala di grigi. Attraverso il pulsante "open file" è possibile reperire delle immagini di esempio presenti nella cartella \lstinline{./resources}, oppure sceglierne una personalizzata dal proprio dispositivo.
+Si richiede all’utente di selezione un'immagine \lstinline{.bmp} in scala di grigi. Attraverso il pulsante \lstinline{Open file} è possibile reperire delle immagini di esempio presenti nella cartella \lstinline{./resources}, oppure sceglierne una personalizzata dal proprio dispositivo.
 
 La finestra di dialogo è predisposta per filtrare le immagini selezionabili imponendo la scelta di immagini con estensione \lstinline{.bmp}. All'apertura viene effettuato il controllo che l'immagine sia effettivamente in scala di grigi. In caso di fallimento, sarà visualizzata una message box per notificarne l'errore.
 
@@ -171,10 +171,10 @@ L’immagine viene caricata nella prima sezione del pannello permettendo di scal
 Per procedere con la compressione è necessario impostare i parametri $F$ e $d$. Questo permetterà di studiare gli effetti della compressione tramite alcuni esempi riportati nella \cref{section:examples}.
 
 \subsubsection*{Note sulla compressione}
-Solitamente, un’immagine a colori è composta da quattro canali ben distinti, identificati con la sigla \textbf{RGBA}: Red, Green, Blue e Alpha (Trasparency).
+Solitamente, un’immagine a colori è composta da quattro canali ben distinti, identificati con la sigla \textbf{RGBA}: Red, Green, Blue e Alpha (Transparency).
 La loro combinazione permette la definizione di un qualunque colore.
 
-La traccia richiede di lavorare con immagini in toni di grigio. Queste immagini verranno lette dall'applicazione come immagini a colori, tuttavia, questo non costituisce un problema.
+La traccia richiede di lavorare con immagini in toni di grigio. Queste verranno lette dall'applicazione come immagini a colori per le quali ogni pixel occupa 32bit (8 bit per ogni canale).
 
 La \cref{fig:channels} illustra come la rappresentazione di una determinata tonalità di grigio comporti lo stesso valore nelle componenti R, G e B.
 \begin{figure}[H]
@@ -192,9 +192,9 @@ La \cref{fig:channels} illustra come la rappresentazione di una determinata tona
 Il listato \ref{code:pixel-read} riporta le istruzioni di lettura ed estrazione dei pixel utilizzate dal nostro algoritmo.
 Si può notare che dati i pixel di un immagine, si specifica il numero di byte presenti nella stessa ottenendo un buffer di dimensione \lstinline{altezza} $\times$ \lstinline{larghezza} $\times$ \lstinline{canali}.
 
-Il buffer di bit viene suddiviso in gruppi da 8bit (\lstinline{uint8}) per ottenere i singoli byte di ciascuna componente dell'immagine. In conclusione, si estrae solamente il primo livello, che equivale alla componente \lstinline{R} dell'immagine.
+Il buffer di bit viene suddiviso in gruppi da 8bit (\lstinline{uint8}) per ottenere i singoli byte di ciascuna componente dell'immagine. In conclusione, si estrae solamente il primo livello, equivalente alla componente \lstinline{R} dell'immagine.
 
-I valori del singolo canale pur essendo interi vengono convertiti in float, per evitare troncamenti o overflow nell'applicazione della DCT negli step successivi.
+I valori del singolo canale pur essendo interi vengono convertiti in float, per evitare troncamenti o overflow nell'applicazione della DCT ed IDCT negli step successivi.
 
 \begin{lstlisting}[language=Python,label=code:pixel-read,caption=Estrazione del canale R dall'immagine]
 # Source rappresenta la mappa dei pixel dell'immagine
@@ -222,7 +222,7 @@ L'algoritmo implementato e riportato in \cref{fig:flow-compression} e nel listat
 	\end{enumerate}
     \item L’immagine viene divisa in blocchi $z$ di dimensione $F\times F$ contenenti i rispettivi pixel dell'immagine originale, partendo dal primo blocco in alto a sinistra (\cref{fig:flow-compression-block}).
 
-    \textbf{Nota:} Eventuali pixel per i quali non è possibile costruire un quadrato che li contenga, non verrranno compressi, e saranno una copia esatta dell'immagine originale.
+    \textbf{Nota:} Eventuali pixel in eccesso per i quali non è possibile costruire un quadrato che li contenga non verranno compressi e saranno copiati direttamente dall'immagine originale.
 
 	\item Per ogni blocco si effettuano le seguenti operazioni effettuando una sostituzione diretta nella matrice di pixel:
 	\begin{enumerate}
@@ -231,7 +231,7 @@ L'algoritmo implementato e riportato in \cref{fig:flow-compression} e nel listat
 		\item Si applica $\mathit{IDCT2}$ sulla matrice $C$: $z = \mathit{IDCT2}(C)$
 	\end{enumerate}
 	\item I valori della matrice di pixel vengono limitati tra $[0,255]$ e arrotondati all'intero più vicino
-	\item La \lstinline{PixMap} viene riconvertita in immagine e visualizzata nella sezione dedicata
+	\item La \lstinline{PixMap} viene riconvertita in immagine e visualizzata nella sezione dedicata, affiancata all'immagine originale.
 \end{enumerate}
 
 \begin{figure}[H]
