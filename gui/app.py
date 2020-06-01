@@ -22,14 +22,14 @@ class App(QMainWindow):
         self.openFile.clicked.connect(self.ask_image)
 
         # Bind scaleImage checkbox signals
-        self.scaleImage.stateChanged.connect(self.fx_UpdateImageScaling(source=self.scaleImage, targets=[self.originalImage, self.compressedImage]))
+        self.scaleImage.stateChanged.connect(self.updateImageScaling)
 
         # Bind F slider signals
-        self.fSlider.valueChanged.connect(self.fx_UpdateLabel(source=self.fSlider, target=self.fValue))
-        self.fSlider.valueChanged.connect(self.fx_UpdateMaxDValue(source=self.fSlider, target=self.dSlider))
+        self.fSlider.valueChanged.connect(self.updateFLabel)
+        self.fSlider.valueChanged.connect(self.updateMaxDValue)
 
         # Bind d slider signals
-        self.dSlider.valueChanged.connect(self.fx_UpdateLabel(source=self.dSlider, target=self.dValue))
+        self.dSlider.valueChanged.connect(self.updateDLabel)
 
         # Bind applyButton signals
         self.applyButton.clicked.connect(self.compress_image)
@@ -69,7 +69,7 @@ class App(QMainWindow):
         values.setsize(height * width * 4)
 
         pixels = np.frombuffer(values, np.uint8).reshape((height, width, 4)).copy()
-        pixels = pixels[:, :, 0]
+        pixels = pixels[:, :, 0].astype(np.float)
 
         F = self.fSlider.value()
         d = self.dSlider.value()
@@ -79,8 +79,7 @@ class App(QMainWindow):
 
         for r in range(height_blocks_count):
             for c in range(width_blocks_count):
-                block = pixels[r*F : (r+1)*F, c*F : (c+1)*F]
-                block = dctn(block, norm='ortho')
+                block = dctn(pixels[r*F : (r+1)*F, c*F : (c+1)*F], norm='ortho')
 
                 for k in range(F):
                     for l in range(F):
@@ -89,30 +88,32 @@ class App(QMainWindow):
 
                 pixels[r*F : (r+1)*F, c*F : (c+1)*F] = idctn(block, norm='ortho')
 
-        for r in range(height_blocks_count*F):
-            for c in range(width_blocks_count*F):
-                if pixels[r,c] > 255:
-                    pixels[r,c] = 255
-                elif pixels[r,c] < 0:
-                    pixels[r,c] = 0
+        pixels = pixels.clip(0, 255).round().astype(np.uint8)
 
         target = QImage(bytes(pixels), pixels.shape[1], pixels.shape[0], int(pixels.nbytes/height), QImage.Format_Grayscale8)
         self.compressedImage.setPixmap(QPixmap.fromImage(target))
 
-    def fx_UpdateImageScaling(self, source=None, targets=[]):
-        return lambda: [target.setShouldScale(source.isChecked()) for target in targets]
+    def updateImageScaling(self):
+        for target in [self.originalImage, self.compressedImage]:
+            target.setShouldScale(self.scaleImage.isChecked())
 
-    def fx_UpdateLabel(self, source=None, target=None):
-        return lambda: target.setText(str(source.value()))
+    def updateFLabel(self):
+        self.fValue.setText(str(self.fSlider.value()))
 
-    def fx_UpdateMaxDValue(self, source=None, target=None):
-        return lambda: (
-            source.value() == 1 and target.setValue(0),
-            source.value() > 1 and target.setMaximum(2*source.value() - 2),
-            source.value() > 1 and target.setTickInterval((2*source.value() - 2) / 10),
-            target.setEnabled(True if source.value() > 1 else False)
-        )
+    def updateDLabel(self):
+        self.dValue.setText(str(self.dSlider.value()))
 
+    def updateMaxDValue(self):
+        if self.fSlider.value() == 1:
+            self.dSlider.setValue(0)
+            self.dSlider.setEnabled(False)
+            return
+
+        limit = 2*self.fSlider.value() - 2
+
+        self.dSlider.setMaximum(limit)
+        self.dSlider.setTickInterval(limit / 10)
+        self.dSlider.setEnabled(True)
 
 app = QApplication(sys.argv)
 window = App()
