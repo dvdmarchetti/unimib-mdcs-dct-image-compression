@@ -79,7 +79,7 @@ I risultati ottenuti saranno riportati graficamente in un grafico a scala semi-l
 Libreria open source che contiene diverse funzioni e metodi utili per il calcolo scientifico. In particolar modo per il calcolo vettoriale e di matrici multidimensionali in maniera efficiente e veloce.
 
 \subsubsection*{Scipy}
-Libreria open source che utilizza le funzionalità di Numpy per fornire un pacchetto di calcolo scientifico General-purpose. In particolare, in questo progetto si utilizza l'estensione \textbf{Fast Fourier Transform} (\lstinline{fftpack}) per lavorare con la \lstinline{DCT monodimensionale} e \lstinline{multidimensionale}(\textbf{DCT2}).
+Libreria open source che utilizza le funzionalità di Numpy per fornire un pacchetto di calcolo scientifico General-purpose. In particolare, in questo progetto si utilizza l'estensione \textbf{Fast Fourier Transform} (\lstinline{fftpack}) per lavorare con la \lstinline{DCT} monodimensionale e multidimensionale (\lstinline{DCT2}).
 
 \subsubsection*{Pandas}
 Fornisce una serie di strumenti per elaborare e manipolare dati in formato tabellare (\lstinline{DataFrame}) interfacciandosi con le strutture dati native in Python.
@@ -93,14 +93,17 @@ Utilizzato principalmente per la creazione di grafici statistici. Agisce come un
 
 \subsection{Implementazione della DCT in Scipy}
 \label{section:scipy-fft}
-Dalla documentazione del modulo \lstinline{scipy.fftpack}\footnote{\url{http://wwwens.aero.jussieu.fr/lefrere/master/SPE/docs-python/scipy-doc/generated/scipy.fftpack.dct.html}} viene referenziato un documento che descrive dal punto di vista matematico l'implementazione della DCTN nella libreria.
+Dalla documentazione del modulo \lstinline{scipy.fftpack}\footnote{\url{http://wwwens.aero.jussieu.fr/lefrere/master/SPE/docs-python/scipy-doc/generated/scipy.fftpack.dct.html}} viene referenziato un documento che descrive dal punto di vista matematico l'implementazione della DCT multidimensionale nella libreria.
 
 \noindent
 L'abstract del paper \textit{"A fast cosine transform in one and two dimensions"} di \textit{Makhoul, J. (Feb. 1980)}\footnote{\url{https://ieeexplore.ieee.org/document/1163351}} riporta:
 \begin{quote}
     The discrete cosine transform (DCT) of an $N$-point real signal is derived by taking the discrete Fourier transform (DFT) of a $2N$-point even extension of the signal.
+
     It is shown that the same result may be obtained using only an $N$-point DFT of a reordered version of the original signal, with a resulting saving of 1/2.
+
     If the fast Fourier transform (FFT) is used to compute the DFT, the result is a fast cosine transform (FCT) that can be computed using on the order of $N log_2(N)$ real multiplications.
+
     The method is then extended to two dimensions, with a saving of 1/4 over the traditional method that uses the DFT.
 \end{quote}
 
@@ -115,10 +118,9 @@ La funzione $\mathit{DCT}$ prende in input un vettore $V$ di dimensione $N$ ed e
     \item Viene pre-allocato un vettore $C$ di dimensione $N$ con componenti tutte pari a zero.
     \item Per ogni elemento del vettore $V$ di input:
     \begin{enumerate}
-        \item Viene calcolato il coefficiente $C[k]$ nella base $w_k$ del valore $V[i]$
-        \item Questo viene scalato per un certo valore $\alpha_k$
+        \item Viene calcolato il coefficiente $C[k]$ nella base $w_k$ del valore $V[i]$ e normalizzato per un certo valore $\alpha_k$
     \end{enumerate}
-    \item Il vettore risultante $C$ viene ritornato come vettore in output
+    \item Il vettore risultante $C$ viene ritornato come output
 \end{enumerate}
 
 \begin{lstlisting}[language=python,emph={math,np},caption=Implementazione della DCT monodimensionale]
@@ -143,7 +145,7 @@ La implementazione della DCT2 sfrutta l'applicazione della DCT monodimensionale 
 
 Nell'algoritmo, l'input risulta essere una matrice quadrata $\mathit{Mat}$ di dimensione $N\times N$. Inoltre, viene definita una matrice intermedia $C$ inizializzata a zero la quale sarà elaborata a partire dalla matrice in input per ottenere l'applicazione corretta della DCT2.
 
-Inizialmente si effettua la $\mathit{DCT}$ monodimensionale prima sui vettori colonna della matrice originale salvando i risultati ottenuti nella matrice $C$ e, successivamente, sui vettori riga della stessa appena popolati.
+Inizialmente si effettua la $\mathit{DCT}$ monodimensionale prima sui vettori colonna della matrice $Mat$ originale salvando i risultati ottenuti nella matrice $C$ poi sui vettori riga della stessa appena popolati.
 
 \begin{lstlisting}[language=python,emph={math,np},caption=Implementazione della DCT multidimensionale (DCT2)]
 def dct2(Mat):
@@ -232,5 +234,5 @@ L'implementazione proposta dal documento citato nella \cref{section:scipy-fft} r
 
 Dall'analisi grafica possiamo notare che la \lstinline{DCT2} implementata manualmente segue un andamento riconducibile ad un $O(N^3)$, invece l'implementazione utilizzata in \lstinline{scipy} delinea un andamento altalenante tra $O(NlogN)$) e $O(N^2)$.
 
-Naturalmente, ci si aspettava che la nostra implementazione risultasse decisamente più lenta dell'implementazione FFT, tuttavia il risultato ottenuto in termini numerici risulta equiparabile con entrambi i metodi.
+Naturalmente, ci si aspettava che la nostra implementazione risultasse decisamente più lenta dell'implementazione FFT, ciononostante il risultato ottenuto in termini numerici risulta equiparabile con entrambi i metodi.
 \end{document}
